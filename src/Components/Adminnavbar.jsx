@@ -19,7 +19,7 @@ const Adminnavbar = () => {
 
   const handleLogout = () => {
     console.log("Logging out...");
-    localStorage.setItem('isAuthenticated', 'false');
+    localStorage.setItem('isAuthenticated', 'falsey');
     navigate('/');
   };
 
