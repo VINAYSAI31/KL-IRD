@@ -13,8 +13,7 @@ function LoginPage({ setIsAuthenticated }) {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError(null);
-  
-    console.log('Attempting login with username:', username);
+
   
     try {
       const { data, error } = await supabase
@@ -23,9 +22,6 @@ function LoginPage({ setIsAuthenticated }) {
         .eq('username', username)
         .single();
   
-        console.log('Supabase response:', JSON.stringify(data, null, 2));
-        console.log('Supabase error:', error);
-          
       if (error) throw error;
   
       if (data) {
