@@ -1,13 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import Adminnavbar from '../Components/Adminnavbar';
+import { supabase } from '../supabaseClient'; // Import the Supabase client
 
 const ViewActivities = () => {
   const [activities, setActivities] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch activities from localStorage
-    const storedActivities = JSON.parse(localStorage.getItem('activities')) || [];
-    setActivities(storedActivities);
+    const fetchActivities = async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('Activities') // Ensure this matches your table name
+        .select('*');
+
+      if (error) {
+        console.error('Error fetching activities:', error.message);
+      } else {
+        setActivities(data);
+      }
+      setLoading(false);
+    };
+
+    fetchActivities();
   }, []);
 
   return (
@@ -35,20 +49,30 @@ const ViewActivities = () => {
             </div>
           </div>
 
-          {/* Activities Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
-            {activities.map((activity, index) => (
-              <div key={index} className="card">
-                <h2>{activity.activityName}</h2>
-                <p>{activity.description}</p>
-                <div className="mt-2">
-                  <p>Date: {activity.date}</p>
-                  <p>Time: {activity.time}</p>
-                  <p>Location: {activity.location}</p>
+          {loading ? (
+            <p>Loading activities...</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+              {activities.map((activity, index) => (
+                <div key={index} className="card">
+                  <h2>{activity.activity_name}</h2>
+                  <p>{activity.description}</p>
+                  <div className="mt-2">
+                    <p>Date: {activity.date}</p>
+                    <p>Time: {activity.time}</p>
+                    <p>Location: {activity.location}</p>
+                    {activity.image && (
+                      <img
+                        src={activity.image}
+                        alt={activity.activity_name}
+                        className="mt-2 h-40 w-auto object-cover rounded-md"
+                      />
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </>

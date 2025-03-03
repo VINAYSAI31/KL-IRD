@@ -16,8 +16,8 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/" element={<AdminHome />} />
+        <Route path="/" element={<LoginPage />} />
+        <Route path="/home" element={<AdminHome />} />
         <Route path="/add-activity" element={<AddActivity />} />
         <Route path="/view-activities" element={<ViewActivities />} />
         <Route path="/clubs" element={<Clubs />} />

@@ -1,104 +1,181 @@
 import React from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { Users, Briefcase, Calendar, ArrowLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { Users, Briefcase, Calendar, ArrowRight, BarChart } from 'lucide-react';
 import Adminnavbar from '../Components/Adminnavbar';
 
-const clubData = {
-  sods: {
+const clubs = [
+  {
+    id: 'sods',
     name: 'SODS',
-    fullName: 'Society of Data Scientists',
-    color: 'bg-blue-500',
-    description: 'Promoting data science and analytics skills among students'
-  },
-  garuda: {
-    name: 'Garuda',
-    fullName: 'Robotics & Innovation Club',
-    color: 'bg-green-500',
-    description: 'Fostering innovation and robotics development'
-  },
-  vega: {
-    name: 'Vega',
-    fullName: 'Astronomy & Space Club',
-    color: 'bg-purple-500',
-    description: 'Exploring astronomy and space sciences'
-  }
-};
-
-const Clubs = () => {
-  const { clubId } = useParams();
-  const navigate = useNavigate();
-  
-  const club = clubId && clubData[clubId];
-
-  if (!club) {
-    return <div>Club not found</div>;
-  }
-
-  const managementOptions = [
-    {
-      id: 'members',
-      name: 'Manage Members',
-      description: 'Add, remove, or update club member information',
-      icon: <Users size={24} className="text-blue-600" />,
-      action: () => console.log('Manage members')
-    },
-    {
-      id: 'projects',
-      name: 'Manage Projects',
-      description: 'Create and track projects for the club',
-      icon: <Briefcase size={24} className="text-blue-600" />,
-      action: () => console.log('Manage projects')
-    },
-    {
-      id: 'activities',
-      name: 'Manage Activities',
-      description: 'Schedule and organize club activities and events',
-      icon: <Calendar size={24} className="text-blue-600" />,
-      action: () => navigate(`/add-activity/${clubId}`)
+    description: 'Society of Data Scientists',
+    fullDescription: 'Promoting data science and analytics skills among students through workshops, competitions, and industry collaborations.',
+    color: 'bg-blue-600',
+    icon: <BarChart size={32} className="text-white" />,
+    stats: {
+      members: 120,
+      projects: 8,
+      events: 15
     }
-  ];
+  },
+  {
+    id: 'garuda',
+    name: 'Garuda',
+    description: 'Robotics & Innovation Club',
+    fullDescription: 'Fostering innovation and robotics development through hands-on projects, competitions, and technical workshops.',
+    color: 'bg-green-600',
+    icon: <Briefcase size={32} className="text-white" />,
+    stats: {
+      members: 85,
+      projects: 12,
+      events: 9
+    }
+  },
+  {
+    id: 'vega',
+    name: 'Vega',
+    description: 'Astronomy & Space Club',
+    fullDescription: 'Exploring astronomy and space sciences through stargazing events, seminars, and collaborative research projects.',
+    color: 'bg-purple-600',
+    icon: <Calendar size={32} className="text-white" />,
+    stats: {
+      members: 65,
+      projects: 5,
+      events: 7
+    }
+  }
+];
+
+const ManageClubs = () => {
+  const navigate = useNavigate();
+
+  const handleClubSelect = (clubId) => {
+    navigate(`/club/${clubId}`);
+  };
 
   return (
     <>
-      <Adminnavbar />
-      <div className="max-w-6xl mx-auto mt-8">
-        <button
-          onClick={() => navigate('/manage-clubs')}
-          className="flex items-center text-blue-600 hover:text-blue-800 mb-6"
-        >
-          <ArrowLeft size={16} className="mr-1" />
-          Back to Clubs
-        </button>
+   
+    <Adminnavbar/>
+       {/* Main Content */}
+       <div className="main-content">
+         <div className="card-container">
+           {/* Top Card */}
+           <div className="top-card ">
+             <h1>
+               <h1 className="text-3xl font-bold tracking-tight">Welcome back, Admin!</h1>
+               <p className="text-lg text-muted-foreground mt-4">
+               Here's what's happening in the KL-IRD
+             </p>
+             </h1>
+             <div className="top-actions">
+               <div className="search-bar">
+                 <input type="text" placeholder="Search..." />
+                 <i className="fas fa-search"></i>
+               </div>
+               <div className="bell-icon">
+                 <i className="fas fa-bell"></i>
+               </div>
+             </div>
+           </div>
+ 
+           {/* Main Dashboard Card */} <div className="max-w-6xl mx-auto">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-800">Club Management</h1>
+        <p className="text-gray-600 mt-2 max-w-3xl">
+          Manage club activities, members, and projects. Select a club below to access its dashboard and administrative functions.
+        </p>
+      </div>
 
-        <div className={`${club.color} rounded-lg p-6 mb-8 text-white`}>
-          <h1 className="text-2xl font-bold">{club.name}</h1>
-          <p className="text-white text-opacity-90 mt-2">{club.fullName}</p>
-          <p className="mt-4">{club.description}</p>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {managementOptions.map((option) => (
-            <div
-              key={option.id}
-              className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow duration-300"
-            >
-              <div className="flex items-center mb-4">
-                {option.icon}
-                <h3 className="ml-3 text-lg font-semibold text-gray-800">{option.name}</h3>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {clubs.map((club) => (
+          <div
+            key={club.id}
+            className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1"
+          >
+            <div className={`${club.color} p-6`}>
+              <div className="flex justify-between items-center">
+                <div className="bg-white/20 p-3 rounded-lg">
+                  {club.icon}
+                </div>
+                <span className="text-white text-xl font-bold">{club.name}</span>
               </div>
-              <p className="text-gray-600 mb-4">{option.description}</p>
+            </div>
+            <div className="p-6">
+              <h3 className="text-xl font-semibold text-gray-800 mb-2">{club.description}</h3>
+              <p className="text-gray-600 text-sm mb-4 h-12 line-clamp-2">{club.fullDescription}</p>
+              
+              <div className="grid grid-cols-3 gap-2 mb-6 text-center">
+                <div className="bg-gray-50 rounded-lg p-2">
+                  <p className="text-gray-500 text-xs mb-1">Members</p>
+                  <p className="text-gray-800 font-semibold">{club.stats.members}</p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-2">
+                  <p className="text-gray-500 text-xs mb-1">Projects</p>
+                  <p className="text-gray-800 font-semibold">{club.stats.projects}</p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-2">
+                  <p className="text-gray-500 text-xs mb-1">Events</p>
+                  <p className="text-gray-800 font-semibold">{club.stats.events}</p>
+                </div>
+              </div>
+              
               <button
-                onClick={option.action}
-                className="w-full flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                onClick={() => handleClubSelect(club.id)}
+                className={`w-full flex items-center justify-center px-4 py-3 border border-transparent text-sm font-medium rounded-lg text-white ${club.color} hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors duration-200`}
               >
-                {option.name}
+                Manage Club
+                <ArrowRight size={16} className="ml-2" />
               </button>
             </div>
-          ))}
+          </div>
+        ))}
+      </div>
+      
+      <div className="mt-12 bg-blue-50 rounded-xl p-6 border border-blue-100">
+        <h2 className="text-xl font-semibold text-gray-800 mb-4">Club Management Guidelines</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <h3 className="text-md font-medium text-gray-700 mb-2">Club Administration</h3>
+            <ul className="text-sm text-gray-600 space-y-2">
+              <li className="flex items-start">
+                <span className="text-blue-500 mr-2">•</span>
+                <span>Update club information and leadership details regularly</span>
+              </li>
+              <li className="flex items-start">
+                <span className="text-blue-500 mr-2">•</span>
+                <span>Maintain accurate member records and participation data</span>
+              </li>
+              <li className="flex items-start">
+                <span className="text-blue-500 mr-2">•</span>
+                <span>Schedule regular meetings and track attendance</span>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <h3 className="text-md font-medium text-gray-700 mb-2">Event Management</h3>
+            <ul className="text-sm text-gray-600 space-y-2">
+              <li className="flex items-start">
+                <span className="text-blue-500 mr-2">•</span>
+                <span>Plan and schedule events at least 2 weeks in advance</span>
+              </li>
+              <li className="flex items-start">
+                <span className="text-blue-500 mr-2">•</span>
+                <span>Document all activities with proper descriptions and images</span>
+              </li>
+              <li className="flex items-start">
+                <span className="text-blue-500 mr-2">•</span>
+                <span>Submit post-event reports within 3 days of completion</span>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
-    </>
+    </div>
+           
+         </div>
+       </div>
+     </>
   );
 };
 
-export default Clubs; 
+export default ManageClubs; 

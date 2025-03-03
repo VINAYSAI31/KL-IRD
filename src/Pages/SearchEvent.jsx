@@ -1,102 +1,61 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Calendar, ChevronDown, ChevronUp } from 'lucide-react';
 import Adminnavbar from '../Components/Adminnavbar';
-
-// Sample data for demonstration
-const sampleActivities = [
-  {
-    id: 1,
-    name: 'Data Science Workshop',
-    presenter: 'Dr. John Smith',
-    author: 'Jane Doe',
-    club: 'SODS',
-    date: '2025-03-15',
-    description: 'Introduction to data science concepts and tools. This workshop covers the basics of data analysis, visualization, and machine learning. Participants will learn how to use Python for data science applications.',
-    image: 'https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
-  },
-  {
-    id: 2,
-    name: 'Robotics Competition',
-    presenter: 'Prof. Robert Johnson',
-    author: 'Michael Brown',
-    club: 'Garuda',
-    date: '2025-04-10',
-    description: 'Annual robotics competition for engineering students. Teams will design, build, and program robots to complete specific challenges. Prizes will be awarded to the top three teams.',
-    image: 'https://images.unsplash.com/photo-1561144257-e32e8506397b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
-  },
-  {
-    id: 3,
-    name: 'Star Gazing Night',
-    presenter: 'Dr. Emily Clark',
-    author: 'David Wilson',
-    club: 'Vega',
-    date: '2025-02-28',
-    description: 'Observing celestial bodies using telescopes. Join us for a night of stargazing and learn about constellations, planets, and deep-sky objects. Telescopes will be provided.',
-    image: 'https://images.unsplash.com/photo-1465101162946-4377e57745c3?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
-  },
-  {
-    id: 4,
-    name: 'Machine Learning Seminar',
-    presenter: 'Prof. Sarah Adams',
-    author: 'Thomas Lee',
-    club: 'SODS',
-    date: '2025-05-05',
-    description: 'Advanced machine learning techniques and applications. This seminar will cover deep learning, neural networks, and their applications in various fields. Case studies and practical examples will be discussed.',
-    image: 'https://images.unsplash.com/photo-1485827404703-89b55fcc595e?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
-  },
-  {
-    id: 5,
-    name: 'Drone Building Workshop',
-    presenter: 'Dr. Mark Taylor',
-    author: 'Jennifer White',
-    club: 'Garuda',
-    date: '2025-04-22',
-    description: 'Hands-on workshop for building and programming drones. Participants will learn about drone components, assembly, and basic programming. Each team will build a functional drone by the end of the workshop.',
-    image: 'https://images.unsplash.com/photo-1527977966376-1c8408f9f108?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80'
-  }
-];
+import { supabase } from '../supabaseClient';
 
 const SearchEvent = () => {
   const [searchType, setSearchType] = useState('name');
   const [nameQuery, setNameQuery] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [results, setResults] = useState(sampleActivities);
+  const [results, setResults] = useState([]);
   const [hasSearched, setHasSearched] = useState(false);
   const [sortConfig, setSortConfig] = useState(null);
   const [expandedId, setExpandedId] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const toggleExpand = (id) => {
     setExpandedId(expandedId === id ? null : id);
   };
 
-  useEffect(() => {
-    let filteredResults = [...sampleActivities];
-    
-    if (searchType === 'name' && nameQuery) {
-      filteredResults = filteredResults.filter(
-        activity => 
-          activity.name.toLowerCase().includes(nameQuery.toLowerCase()) ||
-          activity.presenter.toLowerCase().includes(nameQuery.toLowerCase()) ||
-          activity.author.toLowerCase().includes(nameQuery.toLowerCase())
-      );
-    } else if (searchType === 'date') {
-      if (startDate) {
-        filteredResults = filteredResults.filter(
-          activity => activity.date >= startDate
+  const fetchActivities = async () => {
+    try {
+      setIsLoading(true);
+      let query = supabase.from('Activities').select('*');
+
+      if (searchType === 'name' && nameQuery) {
+        query = query.or(
+          `activity_name.ilike.%${nameQuery}%,` +
+          `organizer.ilike.%${nameQuery}%`
         );
+      } else if (searchType === 'date') {
+        if (startDate) {
+          query = query.gte('date', startDate);
+        }
+        if (endDate) {
+          query = query.lte('date', endDate);
+        }
       }
+
+      const { data, error } = await query;
       
-      if (endDate) {
-        filteredResults = filteredResults.filter(
-          activity => activity.date <= endDate
-        );
+      if (error) {
+        throw error;
       }
+
+      console.log('Data received from Supabase:', data);
+      setResults(data || []);
+      setHasSearched(true);
+      setExpandedId(null);
+    } catch (error) {
+      console.error('Error fetching activities:', error);
+    } finally {
+      setIsLoading(false);
     }
-    
-    setResults(filteredResults);
-    setHasSearched(true);
-    setExpandedId(null); // Reset expanded state when new search is performed
+  };
+
+  useEffect(() => {
+    fetchActivities();
   }, [nameQuery, startDate, endDate, searchType]);
 
   const handleSort = (key) => {
@@ -130,6 +89,24 @@ const SearchEvent = () => {
       <ChevronUp size={16} /> : 
       <ChevronDown size={16} />;
   };
+
+  const getImageUrl = (imagePath) => {
+    if (!imagePath) {
+      console.log('No image path provided');
+      return null;
+    }
+  
+    try {
+      console.log('Getting URL for image:', imagePath);
+      const { publicUrl } = supabase.storage.from('activity-images').getPublicUrl(imagePath);
+      console.log('Generated public URL:', publicUrl);
+      return imagePath;
+    } catch (error) {
+      console.error('Error getting image URL:', error);
+      return null;
+    }
+  };
+  
 
   return (
     <>
@@ -246,7 +223,11 @@ const SearchEvent = () => {
                   </h2>
                 </div>
                 
-                {results.length > 0 ? (
+                {isLoading ? (
+                  <div className="p-6 text-center text-gray-500">
+                    Loading activities...
+                  </div>
+                ) : results.length > 0 ? (
                   <div className="space-y-4">
                     {results.map((activity) => (
                       <div key={activity.id} className="border-b border-gray-100 last:border-b-0">
@@ -256,9 +237,9 @@ const SearchEvent = () => {
                         >
                           <div className="flex justify-between items-center">
                             <div>
-                              <h3 className="text-lg font-semibold text-gray-800">{activity.name}</h3>
+                              <h3 className="text-lg font-semibold text-gray-800">{activity.activity_name}</h3>
                               <div className="mt-1 flex items-center text-sm text-gray-600">
-                                <span className="mr-4">Presenter: {activity.presenter}</span>
+                                <span className="mr-4">Presenter: {activity.organizer}</span>
                                 <span className="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
                                   {activity.club}
                                 </span>
@@ -289,9 +270,14 @@ const SearchEvent = () => {
                               {activity.image && (
                                 <div className="md:w-1/3 mb-4 md:mb-0 md:mr-6">
                                   <img
-                                    src={activity.image}
-                                    alt={activity.name}
-                                    className="rounded-lg w-full h-48 object-cover"
+                                    src={getImageUrl(activity.image)}
+                                    alt={activity.activity_name}
+                                    className="rounded-lg w-full object-contain"
+                                    onError={(e) => {
+                                      e.target.onerror = null;
+                                      e.target.src = 'https://via.placeholder.com/400x300?text=No+Image'; // Fallback image
+                                    }}
+                                    style={{ maxHeight: '100%', maxWidth: '100%' }}
                                   />
                                 </div>
                               )}
@@ -302,11 +288,11 @@ const SearchEvent = () => {
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                   <div>
                                     <h4 className="text-sm font-medium text-gray-500 mb-1">Author</h4>
-                                    <p className="text-gray-700">{activity.author}</p>
+                                    <p className="text-gray-700">{activity.Author}</p>
                                   </div>
                                   <div>
                                     <h4 className="text-sm font-medium text-gray-500 mb-1">Presenter</h4>
-                                    <p className="text-gray-700">{activity.presenter}</p>
+                                    <p className="text-gray-700">{activity.organizer}</p>
                                   </div>
                                 </div>
                               </div>

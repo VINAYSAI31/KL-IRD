@@ -1,22 +1,58 @@
-import React from "react";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // Updated to use useNavigate
+import { supabase } from '../supabaseClient';
+import bcrypt from 'bcryptjs';
+
 
 function LoginPage() {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState(null);
+  const navigate = useNavigate(); // Updated to use useNavigate
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError(null);
+  
+    console.log('Attempting login with username:', username);
+  
+    try {
+      const { data, error } = await supabase
+        .from('Admins')
+        .select()
+        .eq('username', username)
+        .single();
+  
+        console.log('Supabase response:', JSON.stringify(data, null, 2));
+        console.log('Supabase error:', error);
+          
+      if (error) throw error;
+  
+      if (data) {
+        console.log('Login successful!');
+        navigate('/home');
+      } else {
+        setError('Invalid username or password');
+      }
+    } catch (err) {
+      console.error('Error logging in:', err);
+      setError('An error occurred. Please try again.');
+    }
+  };
+
+
   return (
     <div className="flex flex-col min-h-screen">
       {/* Navbar */}
       <nav className="bg-red-900 text-white py-4 px-8 flex items-center justify-center relative">
-  
-  <span className="text-xl font-bold">Integrated Research & Discovery - KL University</span>
-</nav>
-
+        <span className="text-xl font-bold">Integrated Research & Discovery - KL University</span>
+      </nav>
 
       {/* Main Content */}
       <div className="flex flex-grow bg-gray-200 p-10 justify-center items-center">
-        <div className="w-full max-w-10xl bg-gray-200 p-10  flex">
-        
+        <div className="w-full max-w-10xl bg-gray-200 p-10 flex">
           {/* Left Section - Information */}
           <div className="w-1/2 pr-6">
-           
             <h2 className="text-3xl font-bold text-red-700 mb-4">
               KL University IRD Portal - Centralized Research Management
             </h2>
@@ -45,25 +81,46 @@ function LoginPage() {
               <h2 className="text-xl font-bold text-red-800 text-center mb-4">
                 Admin Login
               </h2>
-              <input
-                type="text"
-                placeholder="Enter Your ID"
-                className="w-full border p-2 mb-4 rounded-md"
-              />
-              <input
-                type="password"
-                placeholder="Enter 6-digit pin"
-                className="w-full border p-2 mb-4 rounded-md"
-              />
-              <button className="w-full bg-red-800 text-white py-2 rounded-md hover:bg-red-700">
-                Login
-              </button>
+              <form onSubmit={handleLogin} className="space-y-4">
+                <div>
+                  <label htmlFor="username" className="block text-sm font-medium text-gray-700">
+                    Username
+                  </label>
+                  <input
+                    type="text"
+                    id="username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                </div>
+                <div>
+                  <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    id="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                    required
+                  />
+                </div>
+                {error && <p className="text-red-500 text-sm">{error}</p>}
+                <button
+                  type="submit"
+                  className="w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Login
+                </button>
+              </form>
               <p className="text-center text-red-900 mt-2 cursor-pointer">
                 Forgot Password?
               </p>
             </div>
           </div>
-
         </div>
       </div>
 
