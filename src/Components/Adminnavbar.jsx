@@ -19,6 +19,7 @@ const Adminnavbar = () => {
 
   const handleLogout = () => {
     console.log("Logging out...");
+    localStorage.setItem('isAuthenticated', 'false');
     navigate('/');
   };
 
@@ -49,7 +50,7 @@ const Adminnavbar = () => {
         {/* Navigation Links */}
         <div className="flex-1 py-6 space-y-1 px-3 text-gray-100 overflow-y-auto">
           <div className="space-y-2 px-3">
-            <NavItem icon={FaHome} text="Home" to="/" />
+            <NavItem icon={FaHome} text="Home" to="/home" />
             <NavItem icon={FaImage} text="Clubs" to="/clubs" />
             <NavItem icon={LayoutDashboard} text="Add Events" to="/add-activity" />
             <NavItem icon={FaTasks} text="Search Event" to="/search-event" />

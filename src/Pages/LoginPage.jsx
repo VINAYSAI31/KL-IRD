@@ -4,7 +4,7 @@ import { supabase } from '../supabaseClient';
 import bcrypt from 'bcryptjs';
 
 
-function LoginPage() {
+function LoginPage({ setIsAuthenticated }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState(null);
@@ -29,8 +29,16 @@ function LoginPage() {
       if (error) throw error;
   
       if (data) {
-        console.log('Login successful!');
-        navigate('/home');
+        // Assuming password is stored in plain text for this example
+        const isMatch = await bcrypt.compare(password, data.password);
+        if (isMatch) {
+          console.log('Login successful!');
+          setIsAuthenticated(true); // Set authentication state to true
+          localStorage.setItem('isAuthenticated', 'true'); // Store authentication state
+          navigate('/home');
+        } else {
+          setError('Invalid username or password');
+        }
       } else {
         setError('Invalid username or password');
       }
@@ -39,7 +47,6 @@ function LoginPage() {
       setError('An error occurred. Please try again.');
     }
   };
-
 
   return (
     <div className="flex flex-col min-h-screen">

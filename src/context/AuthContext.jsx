@@ -8,33 +8,45 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check initial session
+    // ✅ Persist session
     const checkUser = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        setUser(session?.user || null);
-        setLoading(false);
+        if (session) {
+          setUser(session.user);
+          localStorage.setItem('supabaseSession', JSON.stringify(session)); // Save session
+        } else {
+          setUser(null);
+        }
       } catch (error) {
         console.error('Error checking auth:', error);
-        setLoading(false);
       }
+      setLoading(false);
     };
 
     checkUser();
 
-    // Listen for auth changes
+    // ✅ Restore session on refresh
+    const storedSession = localStorage.getItem('supabaseSession');
+    if (storedSession) {
+      setUser(JSON.parse(storedSession).user);
+      setLoading(false);
+    }
+
+    // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user || null);
+      if (session) {
+        localStorage.setItem('supabaseSession', JSON.stringify(session)); // Update session
+      } else {
+        localStorage.removeItem('supabaseSession'); // Clear session
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  const value = {
-    user,
-    setUser,
-    loading
-  };
+  const value = { user, setUser, loading };
 
   return (
     <AuthContext.Provider value={value}>
@@ -43,6 +55,4 @@ export const AuthProvider = ({ children }) => {
   );
 };
 
-export const useAuth = () => {
-  return useContext(AuthContext);
-}; 
+export const useAuth = () => useContext(AuthContext);
