@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { ArrowLeft, User, FileText, Calendar, MapPin, Clock, Image } from 'lucide-react';
+import {  User, FileText, Calendar, MapPin, Clock, Image } from 'lucide-react';
 import Adminnavbar from '../Components/Adminnavbar';
 import { supabase } from '../supabaseClient'; // Import the Supabase client
 
